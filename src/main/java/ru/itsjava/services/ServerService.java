@@ -1,6 +1,7 @@
 package ru.itsjava.services;
 
-public interface ServerService {
+// Расширяем этот интерфейс, интерфейсов Observable, для использования его методов.
+public interface ServerService extends Observable {
 
     void start();
 }

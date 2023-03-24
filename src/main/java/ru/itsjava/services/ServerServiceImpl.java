@@ -9,7 +9,7 @@ import java.util.List;
 
 // Этот сервис работает с сокетами
 // Всю кухню по чтению и записи текстовых сообщений мы переместили в ClientRunnable
-public class ServerServiceImpl implements ServerService, Observable {
+public class ServerServiceImpl implements ServerService{
 
     public final static int PORT = 8081; // порт для открытия сокета
     public final List<Observer> observers = new ArrayList<>(); // список для хранения клиентов
@@ -30,9 +30,8 @@ public class ServerServiceImpl implements ServerService, Observable {
             // Проверяем, подключился ли клиент:
             if (socket != null) {
                 // Создаём новый поток для каждого отдельного клиента
-                Thread thread = new Thread(new ClientRunnable(socket));
+                Thread thread = new Thread(new ClientRunnable(socket, this));
                 thread.start(); // запускаем поток
-
             }
         }
 
