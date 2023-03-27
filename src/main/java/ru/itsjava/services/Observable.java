@@ -6,5 +6,8 @@ public interface Observable {
 
     void deleteObserver(Observer observer); // удалить пользователя
 
-    void notifyObserver(String message); // отправить уведомление
+    void notifyObserver(String message); // отправить уведомление всем наблюдателям
+
+    void notifyObserverExceptSender(Observer observer, String message); // отправить уведомление всем, кроме отправителя
+
 }

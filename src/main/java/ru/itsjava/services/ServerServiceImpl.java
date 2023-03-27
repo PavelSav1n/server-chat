@@ -9,10 +9,10 @@ import java.util.List;
 
 // Этот сервис работает с сокетами
 // Всю кухню по чтению и записи текстовых сообщений мы переместили в ClientRunnable
-public class ServerServiceImpl implements ServerService{
+public class ServerServiceImpl implements ServerService {
 
-    public final static int PORT = 8081; // порт для открытия сокета
-    public final List<Observer> observers = new ArrayList<>(); // список для хранения клиентов
+    private final static int PORT = 8081; // порт для открытия сокета
+    private final List<Observer> observers = new ArrayList<>(); // список для хранения клиентов
 
     @SneakyThrows // чтобы не прокидывать исключения
     @Override
@@ -29,9 +29,9 @@ public class ServerServiceImpl implements ServerService{
             Socket socket = serverSocket.accept();
             // Проверяем, подключился ли клиент:
             if (socket != null) {
-                // Создаём новый поток для каждого отдельного клиента
+                // Создаём новую нить для каждого отдельного клиента
                 Thread thread = new Thread(new ClientRunnable(socket, this));
-                thread.start(); // запускаем поток
+                thread.start(); // запускаем нить. Этот run() мы переопределили в ClientRunnable
             }
         }
 
@@ -39,7 +39,6 @@ public class ServerServiceImpl implements ServerService{
 
     @Override
     public void addObserver(Observer observer) {
-
         observers.add(observer);
     }
 
@@ -48,10 +47,21 @@ public class ServerServiceImpl implements ServerService{
         observers.remove(observer);
     }
 
+    // Отправка сообщений всем наблюдателям в списке
     @Override
     public void notifyObserver(String message) {
         for (Observer elemObserver : observers) {
             elemObserver.notifyMe(message);
+        }
+    }
+
+    // Отправка сообщений всем наблюдателям в списке, кроме отправителя
+    @Override
+    public void notifyObserverExceptSender(Observer observer, String message) {
+        for (Observer elemObserver : observers) {
+            if (!elemObserver.equals(observer)){
+                elemObserver.notifyMe(message);
+            }
         }
     }
 }
