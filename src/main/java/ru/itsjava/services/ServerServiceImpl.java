@@ -1,6 +1,9 @@
 package ru.itsjava.services;
 
 import lombok.SneakyThrows;
+import ru.itsjava.dao.UserDao;
+import ru.itsjava.dao.UserDaoImpl;
+import ru.itsjava.utils.Props;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,6 +16,7 @@ public class ServerServiceImpl implements ServerService {
 
     private final static int PORT = 8081; // порт для открытия сокета
     private final List<Observer> observers = new ArrayList<>(); // список для хранения клиентов
+    private final UserDao userDao = new UserDaoImpl(new Props()); // подключаем DAO работы с пользователем
 
     @SneakyThrows // чтобы не прокидывать исключения
     @Override
@@ -30,7 +34,7 @@ public class ServerServiceImpl implements ServerService {
             // Проверяем, подключился ли клиент:
             if (socket != null) {
                 // Создаём новую нить для каждого отдельного клиента
-                Thread thread = new Thread(new ClientRunnable(socket, this));
+                Thread thread = new Thread(new ClientRunnable(socket, this, userDao));
                 thread.start(); // запускаем нить. Этот run() мы переопределили в ClientRunnable
             }
         }
