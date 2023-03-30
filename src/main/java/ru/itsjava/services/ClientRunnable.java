@@ -62,25 +62,25 @@ public class ClientRunnable implements Runnable, Observer {
         }
     }
 
-    // Метод авторизации пользователя по BufferedReader:
-    @SneakyThrows
-    private boolean authorization(BufferedReader bufferedReader) {
-        System.out.println("bufferedReader = " + bufferedReader); // отладка
-        String authorizationMessage;
-        while ((authorizationMessage = bufferedReader.readLine()) != null) {
-            // Строка для авторизации:
-            // !autho!login:password
-            if (authorizationMessage.startsWith("!autho!")) {
-                // начиная с 7 символа разбиваем подстроку на массив строк, по регулярному выражению ":"
-                String login = authorizationMessage.substring(7).split(":")[0];
-                String password = authorizationMessage.substring(7).split(":")[1];
-                // Проверяем существует ли пользователь с таким логином и паролем (если нет, вылетим с ошибкой)
-                user = userDao.findByNameAndPassword(login, password);
-                return true;
-            }
-        }
-        return false;
-    }
+//    // Метод авторизации пользователя по BufferedReader:
+//    @SneakyThrows
+//    private boolean authorization(BufferedReader bufferedReader) {
+//        System.out.println("bufferedReader = " + bufferedReader); // отладка
+//        String authorizationMessage;
+//        while ((authorizationMessage = bufferedReader.readLine()) != null) {
+//            // Строка для авторизации:
+//            // !autho!login:password
+//            if (authorizationMessage.startsWith("!autho!")) {
+//                // начиная с 7 символа разбиваем подстроку на массив строк, по регулярному выражению ":"
+//                String login = authorizationMessage.substring(7).split(":")[0];
+//                String password = authorizationMessage.substring(7).split(":")[1];
+//                // Проверяем существует ли пользователь с таким логином и паролем (если нет, вылетим с ошибкой)
+//                user = userDao.findByNameAndPassword(login, password);
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     // Метод авторизации пользователя по String:
     // В случае успеха возвращает login пользователя
@@ -99,29 +99,29 @@ public class ClientRunnable implements Runnable, Observer {
         throw new UserNotFoundException();
     }
 
-    // Метод регистрации пользователя по BufferedReader:
-    @SneakyThrows
-    // 1 -- регистрация удалась
-    // 0 -- регистрация не удалась
-    private int registration(BufferedReader bufferedReader) {
-        String registrationMessage;
-        while ((registrationMessage = bufferedReader.readLine()) != null) {
-            // Строка для регистрации:
-            // !reg!login:password
-            if (registrationMessage.startsWith("!reg!")) {
-                // начиная с 5 символа разбиваем подстроку на массив строк, по регулярному выражению ":"
-                String login = registrationMessage.substring(5).split(":")[0];
-                String password = registrationMessage.substring(5).split(":")[1];
-                // Проверяем существует ли пользователь с таким логином:
-                if (userDao.findByName(login) == 0) {
-                    // Если нет, добавляем пользователя:
-                    userDao.createNewUser(login, password);
-                    return 1;
-                }
-            }
-        }
-        return 0;
-    }
+//    // Метод регистрации пользователя по BufferedReader:
+//    @SneakyThrows
+//    // 1 -- регистрация удалась
+//    // 0 -- регистрация не удалась
+//    private int registration(BufferedReader bufferedReader) {
+//        String registrationMessage;
+//        while ((registrationMessage = bufferedReader.readLine()) != null) {
+//            // Строка для регистрации:
+//            // !reg!login:password
+//            if (registrationMessage.startsWith("!reg!")) {
+//                // начиная с 5 символа разбиваем подстроку на массив строк, по регулярному выражению ":"
+//                String login = registrationMessage.substring(5).split(":")[0];
+//                String password = registrationMessage.substring(5).split(":")[1];
+//                // Проверяем существует ли пользователь с таким логином:
+//                if (userDao.findByName(login) == 0) {
+//                    // Если нет, добавляем пользователя:
+//                    userDao.createNewUser(login, password);
+//                    return 1;
+//                }
+//            }
+//        }
+//        return 0;
+//    }
 
     // Метод регистрации пользователя по String:
     // В случае успеха возвращает login пользователя
