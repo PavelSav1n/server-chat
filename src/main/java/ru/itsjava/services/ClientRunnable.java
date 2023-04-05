@@ -2,8 +2,11 @@ package ru.itsjava.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import ru.itsjava.dao.MessageDao;
 import ru.itsjava.dao.UserDao;
+import ru.itsjava.domain.Message;
 import ru.itsjava.domain.User;
+import ru.itsjava.exceptions.RecipientNotFoundException;
 import ru.itsjava.exceptions.UserExistsException;
 import ru.itsjava.exceptions.UserNotFoundException;
 
@@ -22,8 +25,9 @@ public class ClientRunnable implements Runnable, Observer {
     // Для работы с сокетами из сервиса ServerService, нужно задать поле. Для каждого экземпляра клиента оно своё:
     private final Socket socket;
     private final ServerService serverService;
-    private User user; // Сущность (domain) клиента (пользователя) (пока не используем)
+    private User user; // Сущность (domain) клиента (пользователя)
     private final UserDao userDao; // для вызова метода проверки пользователя
+    private final MessageDao messageDao; // для вызова метода проверки пользователя
 
     @SneakyThrows // чтобы не прокидывать исключения
     @Override
@@ -35,31 +39,84 @@ public class ClientRunnable implements Runnable, Observer {
         // и вызываем на сокете метод getInputStream()
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         String messageFromClient;
-        String userName = null;
+        int authFlag = 0;
+
         // *** Цикл приема сообщения из меню (авторизация/регистрация) ***
         while ((messageFromClient = bufferedReader.readLine()) != null) {
+            // Добавляем клиента во временный список авторизации/регистрации для общения с сервером (если его там ещё нет)
+            serverService.addObserverTemp(this);// this работает, потому что addObserverTemp ожидает на входе Observer, а у нас класс ServerService extends Observable
+
+            System.out.println("Добавили наблюдателя " + this.toString().substring(this.toString().length() - 9) + " во временный список"); //отладка
+            serverService.printAllObserversTemp(); // отладка
+            System.out.println(this + "messageFromClient = " + messageFromClient); // отладка
+
+            // Авторизация / регистрация:
             if (messageFromClient.startsWith("!autho!")) {
-                userName = authorization(messageFromClient); // получаем логин авторизированного пользователя
+                try {
+                    user = authorization(messageFromClient); // получаем логин авторизированного пользователя
+                    System.out.println("... клиент " + user.getName() + " успешно авторизировался ...");
+                    authFlag = 1; // ставим флаг об успешной авторизации
+                    serverService.notifyObserverTemp(this, "!auth success!"); // отправляем на клиента флаг об успешной авторизации
+                } catch (UserNotFoundException e) { // ловим ошибку, если не нашли пользователя
+                    serverService.notifyObserverTemp(this, "!auth failed!");
+                }
             } else if (messageFromClient.startsWith("!reg!")) {
-                userName = registration(messageFromClient); // получаем логин зарегистрированного пользователя
+                try {
+                    user = registration(messageFromClient); // получаем логин зарегистрированного пользователя
+                    System.out.println("... клиент " + user.getName() + " успешно зарегистрировался ...");
+                    serverService.notifyObserverTemp(this, "!reg success!"); // отправляем на клиента флаг об успешной авторизации
+                } catch (UserExistsException e) { // ловим ошибку, если пользователь уже есть
+                    serverService.notifyObserverTemp(this, "!reg failed!");
+                }
             }
-            if (userName != null) { // флаг прохождения регистрации или авторизации
-                // Как только авторизация или регистрация пройдена, добавляем клиента в список observers:
-                serverService.addObserver(this); // this работает, потому что addObserver ожидает на входе Observer, а у нас класс ServerService extends Observable
+
+            // флаг прохождения авторизации
+            if (authFlag == 1) {
+                // Как только авторизация пройдена, убираем клиента из списка авторизации и добавляем клиента в список observers:
+                serverService.deleteObserverTemp(this);
+                serverService.addObserver(this, user);
+
+                serverService.printAllObservers(); // отладка
+
                 // *** Цикл приёма сообщения от клиентов ***
                 while ((messageFromClient = bufferedReader.readLine()) != null) {
                     // Если пользователь выходит в меню, удаляем его из списка наблюдателей и выходим из цикла:
-                    if (messageFromClient.equals("exit")){
+                    if (messageFromClient.equals("!exit")) {
+                        serverService.notifyObserver(this, "!exit!");
                         serverService.deleteObserver(this);
+                        authFlag = 0;
                         break;
                     }
-                    System.out.println(userName + ": " + messageFromClient);
-                    // Уведомляем всех, кроме отправителя
-                    serverService.notifyObserverExceptSender(this, userName + ": " + messageFromClient);
+                    // формат private message
+                    // !pm userName message
+                    // Если это private message, то парсим адресат и отправляем ему:
+                    if (messageFromClient.startsWith("!pm")) {
+                        String recipientName = messageFromClient.substring(3).split(" ")[1]; // Имя адресата
+                        User recipient = new User(recipientName); // адресат сообщения
+                        String messageBody = messageFromClient.substring(3).split(" ",3)[2]; // Тело сообщение после удаления !pm и UserName
+                        try {
+                            Observer recipientObserver = serverService.getObserverByName(recipient); // этот же пользователь в списке наблюдателей
+                            serverService.notifyObserver(recipientObserver, messageBody); // пишем сообщение пользователю
+                            Message message = new Message(user, recipient, messageBody); // создаём сообщение
+                            System.out.println("message = " + message); // пишем сообщение в консоль
+                            messageDao.WritePrivateMessageToDatabase(message); // пишем сообщение в БД
 
+                        } catch (RecipientNotFoundException e) {
+                            serverService.notifyObserver(this, "Recipient is not exists or online"); // пользователь может не существовать или не быть в списке
+                        }
+                    } else {
+                        // Если нет адресата, то сообщение уходит всем:
+                        Message message = new Message(user, messageFromClient); // создаём сообщение
+                        messageDao.WritePublicMessageToDatabase(message); // пишем в БД
+                        System.out.println(user.getName() + ": " + messageFromClient); // пишем в консоль сервера
+                        // Уведомляем всех, кроме отправителя
+                        serverService.notifyObserverExceptSender(this, user.getName() + ": " + messageFromClient);
+                    }
                 }
             }
+
         }
+
     }
 
 //    // Метод авторизации пользователя по BufferedReader:
@@ -86,7 +143,7 @@ public class ClientRunnable implements Runnable, Observer {
     // В случае успеха возвращает login пользователя
     // В случае провала -- UserNotFoundException()
     @SneakyThrows
-    private String authorization(String authorizationMessage) {
+    private User authorization(String authorizationMessage) {
         // Строка для авторизации:
         // !autho!login:password
         // начиная с 7 символа разбиваем подстроку на массив строк, по регулярному выражению ":"
@@ -94,7 +151,7 @@ public class ClientRunnable implements Runnable, Observer {
         String password = authorizationMessage.substring(7).split(":")[1];
         // Проверяем существует ли пользователь с таким логином и паролем (если нет, вылетим с ошибкой)
         if (userDao.findByNameAndPassword(login, password) != null) {
-            return login;
+            return new User(login, password);
         }
         throw new UserNotFoundException();
     }
@@ -127,7 +184,7 @@ public class ClientRunnable implements Runnable, Observer {
     // В случае успеха возвращает login пользователя
     // В случае провала -- UserExistsException()
     @SneakyThrows
-    private String registration(String registrationMessage) {
+    private User registration(String registrationMessage) {
         // Строка для регистрации:
         // !reg!login:password
         // начиная с 5 символа разбиваем подстроку на массив строк, по регулярному выражению ":"
@@ -137,7 +194,7 @@ public class ClientRunnable implements Runnable, Observer {
         if (userDao.findByName(login) == 0) {
             // Если нет, добавляем пользователя:
             userDao.createNewUser(login, password);
-            return login;
+            return new User(login, password);
         }
         throw new UserExistsException();
     }
