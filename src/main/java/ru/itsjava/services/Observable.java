@@ -4,7 +4,7 @@ import ru.itsjava.domain.User;
 
 public interface Observable {
 
-    void addObserver(Observer observer, User user); // добавить пользователя
+    void addObserver(Observer observer); // добавить пользователя
 
     void deleteObserver(Observer observer); // удалить пользователя
 

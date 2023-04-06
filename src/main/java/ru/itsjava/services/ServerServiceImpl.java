@@ -11,18 +11,15 @@ import ru.itsjava.utils.Props;
 
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 // Этот сервис работает с сокетами
 // Всю кухню по чтению и записи текстовых сообщений мы переместили в ClientRunnable
 public class ServerServiceImpl implements ServerService {
 
     private final static int PORT = 8081; // порт для открытия сокета
-    private final Map<Observer, User> observers = new HashMap(); // список для хранения клиентов
-    private final Set<Observer> observersTemp = new HashSet<>(); // список для временного хранения клиентов пока они авторизуются (чтобы сервер мог с ними общаться)
+    private final ArrayList<Observer> observers = new ArrayList<>(); // список для хранения клиентов
+    private final ArrayList<Observer> observersTemp = new ArrayList<>(); // список для временного хранения клиентов пока они авторизируются (чтобы сервер мог с ними общаться)
     private final UserDao userDao = new UserDaoImpl(new Props()); // подключаем DAO работы с пользователем
     private final MessageDao messageDao = new MessageDaoImpl(new Props()); // подключаем DAO для работы с сообщениями
 
@@ -50,8 +47,8 @@ public class ServerServiceImpl implements ServerService {
     }
 
     @Override
-    public void addObserver(Observer observer, User user) {
-        observers.put(observer, user);
+    public void addObserver(Observer observer) {
+        observers.add(observer);
     }
 
     @Override
@@ -62,7 +59,7 @@ public class ServerServiceImpl implements ServerService {
     // Отправка сообщений всем наблюдателям в списке
     @Override
     public void notifyAllObservers(String message) {
-        for (Observer elemObserver : observers.keySet()) {
+        for (Observer elemObserver : observers) {
             elemObserver.notifyMe(message);
         }
     }
@@ -70,30 +67,21 @@ public class ServerServiceImpl implements ServerService {
     // Отправка сообщений всем наблюдателям в списке, кроме отправителя
     @Override
     public void notifyObserverExceptSender(Observer observer, String message) {
-        for (Observer elemObserver : observers.keySet()) {
+        for (Observer elemObserver : observers) {
             if (!elemObserver.equals(observer)) {
                 elemObserver.notifyMe(message);
             }
         }
     }
 
-    // Добавляет наблюдателя во временный список авторизации/регистрации, если его ещё там нет
+    // Добавляет наблюдателя во временный список
+    // Если используется цикл и не чистить список, то возможны повторяющиеся наблюдатели т.к. нет проверки на уникальность
     @Override
     public void addObserverTemp(Observer observer) {
-        // При использовании ArrayList столкнулся с ошибкой Concurrent...Exception при запуске двух клиентов и выполнения кода ниже:
+        // При использовании ArrayList столкнулся с ошибкой Concurrent...Exception при запуске двух клиентов и выполнения кода на проверку есть ли обс в данном списке (код удалил):
         // Нужны были уникальные записи в списке, поэтому перешёл на HashSet
-
-        // Если список пустой, просто добавляем:
-//        if (observersTemp.size() == 0) {
-//            observersTemp.add(observer);
-//        } else {
-//            // Если список не пуст, то если нет совпадений, добавляем:
-//            for (Observer elemObserver : observersTemp) {
-//                if (!elemObserver.equals(observer)) {
+        // Однако, потом перешёл обратно на ArrayList<Observer> т.к. при неудачной авторизации просто удалял обса из списка.
         observersTemp.add(observer);
-//                }
-//            }
-//        }
     }
 
     @Override
@@ -114,23 +102,23 @@ public class ServerServiceImpl implements ServerService {
     // Отправка сообщений указанному пользователю
     @Override
     public void notifyObserver(Observer observer, String message) {
-        for (Observer elemObserver : observers.keySet()) {
+        for (Observer elemObserver : observers) {
             if (elemObserver.equals(observer)) {
                 elemObserver.notifyMe(message);
             }
         }
     }
 
-    // Выводим список всех наблюдателей в hashMap() observersTemp
+    // Выводим список всех наблюдателей в observersTemp
     @Override
     public void printAllObservers() {
-        for (Map.Entry<Observer, User> elemMap : observers.entrySet()){
-            System.out.println(elemMap);
+        for (Observer elemObs : observers) {
+            System.out.println(elemObs);
         }
 
     }
 
-    // Выводим список всех наблюдателей в hashSet() observersTemp
+    // Выводим список всех наблюдателей в observersTemp
     @Override
     public void printAllObserversTemp() {
         int count = 0;
@@ -143,11 +131,12 @@ public class ServerServiceImpl implements ServerService {
     // Получаем наблюдателя по имени
     @Override
     public Observer getObserverByName(User user) {
-        for (Map.Entry<Observer, User> elemMap : observers.entrySet()) {
-            if (elemMap.getValue().getName().equals(user.getName())) { // сравниваем по значению поля name, а не по объектам потому что в user.equals() сравниваются ещё поля паролей
-                return elemMap.getKey();
+        for (Observer elemObs : observers) {
+            if (elemObs.getUser().getName().equals(user.getName())) { // сравниваем по значению поля name, а не по объектам потому что в user.equals() сравниваются ещё поля паролей
+                return elemObs;
             }
         }
         throw new RecipientNotFoundException();
     }
+
 }
