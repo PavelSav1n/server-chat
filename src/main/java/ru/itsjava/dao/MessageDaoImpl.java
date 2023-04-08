@@ -2,11 +2,15 @@ package ru.itsjava.dao;
 
 import lombok.RequiredArgsConstructor;
 import ru.itsjava.domain.Message;
+import ru.itsjava.domain.User;
 import ru.itsjava.exceptions.MessageNotCreatedException;
+import ru.itsjava.exceptions.MessagesNotFoundException;
 import ru.itsjava.exceptions.RecipientNotFoundException;
 import ru.itsjava.utils.Props;
 
+import javax.xml.transform.Result;
 import java.sql.*;
+import java.util.ArrayList;
 
 @RequiredArgsConstructor
 public class MessageDaoImpl implements MessageDao {
@@ -83,5 +87,46 @@ public class MessageDaoImpl implements MessageDao {
             e.printStackTrace();
         }
         throw new MessageNotCreatedException(); // На всякий случай
+    }
+
+
+    @Override
+    public ArrayList<String> getLastMessages(User user, int amount) {
+
+        try (Connection connection = DriverManager.getConnection(
+                props.getValue("db.url"),
+                props.getValue("db.login"),
+                props.getValue("db.password"));
+        ) {
+            PreparedStatement preparedStatement = connection.prepareStatement("" +
+                    "SELECT * FROM (\n" +
+                    "SELECT msg.id as messageID, sender.login as senderName, receiver.login as receiverName, msg.text\n" +
+                    "FROM schema_online_course.chat_messages AS msg\n" +
+                    "INNER JOIN schema_online_course.chat_users AS sender ON msg.sender = sender.id\n" +
+                    "LEFT JOIN schema_online_course.chat_users AS receiver ON msg.recipient = receiver.id\n" +
+                    "WHERE (recipient IS NULL OR receiver.login=?)\n" +
+                    "ORDER BY msg.id DESC\n" +
+                    "LIMIT ?) UnsortedResult\n" +
+                    "ORDER BY messageID ASC;");
+
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.setInt(2, amount);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            ArrayList<String> messageArray = new ArrayList<>();
+
+            while(resultSet.next()) {
+                if (resultSet.getString("receiverName") == null) {
+                    messageArray.add(resultSet.getString("senderName") + ":  " + resultSet.getString("text"));
+                } else {
+                    messageArray.add(resultSet.getString("senderName") + " to " + resultSet.getString("receiverName") + ": " + resultSet.getString("text"));
+                }
+            }
+            return messageArray;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        throw new MessagesNotFoundException();
     }
 }

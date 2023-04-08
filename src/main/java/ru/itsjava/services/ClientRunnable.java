@@ -6,6 +6,7 @@ import ru.itsjava.dao.MessageDao;
 import ru.itsjava.dao.UserDao;
 import ru.itsjava.domain.Message;
 import ru.itsjava.domain.User;
+import ru.itsjava.exceptions.MessagesNotFoundException;
 import ru.itsjava.exceptions.RecipientNotFoundException;
 import ru.itsjava.exceptions.UserExistsException;
 import ru.itsjava.exceptions.UserNotFoundException;
@@ -13,7 +14,9 @@ import ru.itsjava.exceptions.UserNotFoundException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.net.Socket;
+import java.util.ArrayList;
 
 // Класс для многопоточности программы (multiple threads)
 // Это сервис клиента -- (класс) для получения и отправки сообщения клиентам
@@ -90,13 +93,13 @@ public class ClientRunnable implements Runnable, Observer {
                         authFlag = 0;
                         break;
                     }
-                    // формат private message
+                    // команда "!pm" -- private message
                     // !pm userName message
                     // Если это private message, то парсим адресат и отправляем ему:
                     if (messageFromClient.startsWith("!pm")) {
                         String recipientName = messageFromClient.substring(3).split(" ")[1]; // Имя адресата
                         User recipientUser = new User(recipientName); // адресат сообщения
-                        String messageBody = messageFromClient.substring(3).split(" ",3)[2]; // Тело сообщение после удаления !pm и UserName
+                        String messageBody = messageFromClient.substring(3).split(" ", 3)[2]; // Тело сообщение после удаления !pm и UserName
                         try {
                             Observer recipientObserver = serverService.getObserverByName(recipientUser); // этот же пользователь в списке наблюдателей
                             serverService.notifyObserver(recipientObserver, messageBody); // пишем сообщение пользователю
@@ -107,14 +110,27 @@ public class ClientRunnable implements Runnable, Observer {
                         } catch (RecipientNotFoundException e) {
                             serverService.notifyObserver(this, "Recipient is not exists or online"); // пользователь может не существовать или не быть в списке
                         }
-                    } else {
-                        // Если нет адресата, то сообщение уходит всем:
-                        Message message = new Message(user, messageFromClient); // создаём сообщение
-                        messageDao.WritePublicMessageToDatabase(message); // пишем в БД
-                        System.out.println(user.getName() + ": " + messageFromClient); // пишем в консоль сервера
-                        // Уведомляем всех, кроме отправителя
-                        serverService.notifyObserverExceptSender(this, user.getName() + ": " + messageFromClient);
-                    }
+                    } else
+                        // команда "!printLast X" печатает X последних сообщений
+                        if (messageFromClient.startsWith("!printLast")) {
+                            String amountOfMessages = messageFromClient.substring(10).split(" ")[1]; // количество последних сообщений для отображения (пока String, ниже будем конвертить в int)
+                            try {
+                                ArrayList<String> lastMessages = messageDao.getLastMessages(user, Integer.parseInt(amountOfMessages)); // конвертим в int
+                                serverService.notifyObserver(this,"Printing last " + lastMessages.size() + " messages:");
+                                for (int i = 0; i < lastMessages.size(); i++) {
+                                    serverService.notifyObserver(this, lastMessages.get(i));
+                                }
+                            } catch (NumberFormatException | MessagesNotFoundException e) {
+                                serverService.notifyObserver(this, "There is no messages, or try to enter an appropriate number");
+                            }
+                        } else {
+                            // Если нет адресата, то сообщение уходит всем:
+                            Message message = new Message(user, messageFromClient); // создаём сообщение
+                            messageDao.WritePublicMessageToDatabase(message); // пишем в БД
+                            System.out.println(user.getName() + ": " + messageFromClient); // пишем в консоль сервера
+                            // Уведомляем всех, кроме отправителя
+                            serverService.notifyObserverExceptSender(this, user.getName() + ": " + messageFromClient);
+                        }
                 }
             }
         }
