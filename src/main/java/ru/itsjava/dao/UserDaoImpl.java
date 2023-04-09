@@ -1,6 +1,7 @@
 package ru.itsjava.dao;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j;
 import ru.itsjava.domain.User;
 import ru.itsjava.exceptions.UserExistsException;
 import ru.itsjava.exceptions.UserNotFoundException;
@@ -8,6 +9,7 @@ import ru.itsjava.utils.Props;
 
 import java.sql.*;
 
+@Log4j
 @AllArgsConstructor
 public class UserDaoImpl implements UserDao {
 
@@ -31,11 +33,12 @@ public class UserDaoImpl implements UserDao {
                 preparedStatement.setString(1, name);
                 preparedStatement.setString(2, password);
                 // Выполняем запрос:
-                System.out.println("preparedStatement.executeUpdate() = " + preparedStatement.executeUpdate());
+                preparedStatement.executeUpdate();
                 // Возвращаем успешно созданного пользователя:
                 return new User(name, password);
             }
         } catch (SQLException e) {
+            log.error(e);
             e.printStackTrace();
         }
         throw new UserExistsException(); // пользователь уже есть с таким именем
@@ -62,6 +65,7 @@ public class UserDaoImpl implements UserDao {
                 return new User(name, password);
             }
         } catch (SQLException e) {
+            log.error(e);
             e.printStackTrace();
         }
         throw new UserNotFoundException(); // не нашли пользователя
@@ -90,6 +94,7 @@ public class UserDaoImpl implements UserDao {
                 return 1;
             }
         } catch (SQLException e) {
+            log.error(e);
             e.printStackTrace();
         }
         return 0; // не нашли такого пользователя
@@ -119,9 +124,9 @@ public class UserDaoImpl implements UserDao {
                 return new User(name, password);
             }
         } catch (SQLException e) {
+            log.error(e);
             e.printStackTrace();
         }
-        // Если не нашли, то кидаем ошибку (при этом остановится сервер и весь чат):
         throw new UserNotFoundException();
     }
 

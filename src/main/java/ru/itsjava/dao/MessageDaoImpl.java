@@ -1,17 +1,17 @@
 package ru.itsjava.dao;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j;
 import ru.itsjava.domain.Message;
 import ru.itsjava.domain.User;
 import ru.itsjava.exceptions.MessageNotCreatedException;
 import ru.itsjava.exceptions.MessagesNotFoundException;
 import ru.itsjava.exceptions.RecipientNotFoundException;
 import ru.itsjava.utils.Props;
-
-import javax.xml.transform.Result;
 import java.sql.*;
 import java.util.ArrayList;
 
+@Log4j
 @RequiredArgsConstructor
 public class MessageDaoImpl implements MessageDao {
 
@@ -24,7 +24,7 @@ public class MessageDaoImpl implements MessageDao {
         try (Connection connection = DriverManager.getConnection(
                 props.getValue("db.url"),
                 props.getValue("db.login"),
-                props.getValue("db.password"));
+                props.getValue("db.password"))
         ) {
             // Извлекаем из таблицы id отправителя:
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT id FROM schema_online_course.chat_users WHERE login = ?;");
@@ -47,11 +47,12 @@ public class MessageDaoImpl implements MessageDao {
             preparedStatement.setInt(2, toId);
             preparedStatement.setString(3, message.getText());
             // Выполняем запрос:
-            System.out.println("Executing inserting message into chat_messages table ... = " + preparedStatement.executeUpdate());
+            preparedStatement.executeUpdate();
             // Возвращаем успешно записанное сообщение:
             return new Message(message.getFrom(), message.getTo(), message.getText());
 
         } catch (SQLException e) {
+            log.error(e);
             e.printStackTrace();
         }
         throw new RecipientNotFoundException(); // не нашли пользователя в ДБ
@@ -63,7 +64,7 @@ public class MessageDaoImpl implements MessageDao {
         try (Connection connection = DriverManager.getConnection(
                 props.getValue("db.url"),
                 props.getValue("db.login"),
-                props.getValue("db.password"));
+                props.getValue("db.password"))
         ) {
 
             // Извлекаем из таблицы id отправителя:
@@ -79,11 +80,12 @@ public class MessageDaoImpl implements MessageDao {
             preparedStatement.setInt(1, fromId);
             preparedStatement.setString(2, message.getText());
             // Выполняем запрос:
-            System.out.println("Executing inserting message into chat_messages table ... = " + preparedStatement.executeUpdate());
+            preparedStatement.executeUpdate();
             // Возвращаем успешно записанное сообщение:
             return new Message(message.getFrom(), message.getText());
 
         } catch (SQLException e) {
+            log.error(e);
             e.printStackTrace();
         }
         throw new MessageNotCreatedException(); // На всякий случай
@@ -96,7 +98,7 @@ public class MessageDaoImpl implements MessageDao {
         try (Connection connection = DriverManager.getConnection(
                 props.getValue("db.url"),
                 props.getValue("db.login"),
-                props.getValue("db.password"));
+                props.getValue("db.password"))
         ) {
             PreparedStatement preparedStatement = connection.prepareStatement("" +
                     "SELECT * FROM (\n" +
@@ -125,6 +127,7 @@ public class MessageDaoImpl implements MessageDao {
             return messageArray;
 
         } catch (SQLException e) {
+            log.error(e);
             e.printStackTrace();
         }
         throw new MessagesNotFoundException();

@@ -2,6 +2,7 @@ package ru.itsjava.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.log4j.Logger;
 import ru.itsjava.dao.MessageDao;
 import ru.itsjava.dao.UserDao;
 import ru.itsjava.domain.Message;
@@ -14,9 +15,9 @@ import ru.itsjava.exceptions.UserNotFoundException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
+
 
 // Класс для многопоточности программы (multiple threads)
 // Это сервис клиента -- (класс) для получения и отправки сообщения клиентам
@@ -25,6 +26,9 @@ import java.util.ArrayList;
 
 @RequiredArgsConstructor
 public class ClientRunnable implements Runnable, Observer {
+
+    // Инициализация логера:
+    private static final Logger log = Logger.getLogger(ClientRunnable.class);
 
     // Для работы с сокетами из сервиса ServerService, нужно задать поле. Для каждого экземпляра клиента оно своё:
     private final Socket socket;
@@ -37,6 +41,7 @@ public class ClientRunnable implements Runnable, Observer {
     @Override
     public void run() {
         System.out.println("Client connected");
+        log.info("Client " + this + " connected");
 
         // Считываем данные, отправленные клиентом.
         // Для этого необходимо создать объект для считывания потока, создаём поток, который будет читать данные с сокета
@@ -50,27 +55,32 @@ public class ClientRunnable implements Runnable, Observer {
             // Добавляем клиента во временный список авторизации/регистрации для общения с сервером (если его там ещё нет)
             serverService.addObserverTemp(this);// this работает, потому что addObserverTemp ожидает на входе Observer, а у нас класс ServerService extends Observable
 
-            System.out.println("Добавили наблюдателя " + this.toString().substring(this.toString().length() - 9) + " во временный список"); //отладка
-            serverService.printAllObserversTemp(); // отладка
-            System.out.println(this + "messageFromClient = " + messageFromClient); // отладка
+//            System.out.println("Добавили наблюдателя " + this.toString().substring(this.toString().length() - 9) + " во временный список"); //отладка
+//            serverService.printAllObserversTemp(); // отладка
+//            System.out.println(this + "messageFromClient = " + messageFromClient); // отладка
 
             // Авторизация / регистрация:
             if (messageFromClient.startsWith("!autho!")) {
                 try {
+                    log.info(messageFromClient);
                     user = authorization(messageFromClient); // получаем логин авторизированного пользователя
-                    System.out.println("... клиент " + user.getName() + " успешно авторизировался ...");
+                    log.info("Client " + user.getName() + " authorized successfully");
                     authFlag = 1; // ставим флаг об успешной авторизации
                     serverService.notifyObserverTemp(this, "!auth success!"); // отправляем на клиента флаг об успешной авторизации
                 } catch (UserNotFoundException e) { // ловим ошибку, если не нашли пользователя
+                    log.error(" Authorization of " + this + " failed");
                     serverService.notifyObserverTemp(this, "!auth failed!");
                     serverService.deleteObserverTemp(this); // удаляем клиента из списка, потому что в начале цикла мы его снова добавим
                 }
             } else if (messageFromClient.startsWith("!reg!")) {
                 try {
+                    log.info(messageFromClient);
                     user = registration(messageFromClient); // получаем логин зарегистрированного пользователя
                     System.out.println("... клиент " + user.getName() + " успешно зарегистрировался ...");
+                    log.info("Client " + user.getName() + " registered successfully");
                     serverService.notifyObserverTemp(this, "!reg success!"); // отправляем на клиента флаг об успешной авторизации
                 } catch (UserExistsException e) { // ловим ошибку, если пользователь уже есть
+                    log.error(" Registration of " + this + " failed");
                     serverService.notifyObserverTemp(this, "!reg failed!");
                     serverService.deleteObserverTemp(this); // удаляем клиента из списка, потому что в начале цикла мы его снова добавим
                 }
@@ -82,12 +92,13 @@ public class ClientRunnable implements Runnable, Observer {
                 serverService.deleteObserverTemp(this);
                 serverService.addObserver(this);
 
-                serverService.printAllObservers(); // отладка
+//                serverService.printAllObservers(); // отладка
 
                 // *** Цикл приёма сообщения от клиентов ***
                 while ((messageFromClient = bufferedReader.readLine()) != null) {
                     // Если пользователь выходит в меню, удаляем его из списка наблюдателей и выходим из цикла:
                     if (messageFromClient.equals("!exit")) {
+                        log.info("User " + this.getUser() + " exited chat...");
                         serverService.notifyObserver(this, "!exit!");
                         serverService.deleteObserver(this);
                         authFlag = 0;
@@ -108,6 +119,8 @@ public class ClientRunnable implements Runnable, Observer {
                             messageDao.WritePrivateMessageToDatabase(message); // пишем сообщение в БД
 
                         } catch (RecipientNotFoundException e) {
+                            log.error(messageFromClient);
+                            log.error("Recipient \"" + recipientName + "\" is not exists or online");
                             serverService.notifyObserver(this, "Recipient is not exists or online"); // пользователь может не существовать или не быть в списке
                         }
                     } else
@@ -116,11 +129,13 @@ public class ClientRunnable implements Runnable, Observer {
                             String amountOfMessages = messageFromClient.substring(10).split(" ")[1]; // количество последних сообщений для отображения (пока String, ниже будем конвертить в int)
                             try {
                                 ArrayList<String> lastMessages = messageDao.getLastMessages(user, Integer.parseInt(amountOfMessages)); // конвертим в int
-                                serverService.notifyObserver(this,"Printing last " + lastMessages.size() + " messages:");
+                                serverService.notifyObserver(this, "Printing last " + lastMessages.size() + " messages:");
                                 for (int i = 0; i < lastMessages.size(); i++) {
                                     serverService.notifyObserver(this, lastMessages.get(i));
                                 }
                             } catch (NumberFormatException | MessagesNotFoundException e) {
+                                log.error(messageFromClient);
+                                log.error("There is no messages, or try to enter an appropriate number");
                                 serverService.notifyObserver(this, "There is no messages, or try to enter an appropriate number");
                             }
                         } else {

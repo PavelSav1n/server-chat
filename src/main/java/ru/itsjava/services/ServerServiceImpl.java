@@ -1,6 +1,9 @@
 package ru.itsjava.services;
 
 import lombok.SneakyThrows;
+
+import lombok.extern.log4j.Log4j;
+import org.apache.log4j.Logger;
 import ru.itsjava.dao.MessageDao;
 import ru.itsjava.dao.MessageDaoImpl;
 import ru.itsjava.dao.UserDao;
@@ -8,14 +11,17 @@ import ru.itsjava.dao.UserDaoImpl;
 import ru.itsjava.domain.User;
 import ru.itsjava.exceptions.RecipientNotFoundException;
 import ru.itsjava.utils.Props;
-
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
 
+@Log4j
 // Этот сервис работает с сокетами
 // Всю кухню по чтению и записи текстовых сообщений мы переместили в ClientRunnable
 public class ServerServiceImpl implements ServerService {
+
+    // Инициализация логера:
+//    private static final Logger log = Logger.getLogger(ServerServiceImpl.class);
 
     private final static int PORT = 8081; // порт для открытия сокета
     private final ArrayList<Observer> observers = new ArrayList<>(); // список для хранения клиентов
@@ -32,6 +38,8 @@ public class ServerServiceImpl implements ServerService {
 
         // Будем "слушать" этот порт:
         System.out.println(" === SERVER STARTS === ");
+        log.info(" === SERVER STARTS === ");
+
         while (true) {
             // Проверка, что клиент подключился
             // Создаём сокет и вызываем на ServerSocket метод accept()
