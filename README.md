@@ -1,9 +1,9 @@
 # server-chat application
 
 ## contents
-[1. SQL setup]()
-[2. application.properties preparaion]()
-[3. Other settings]()
+-[1. SQL setup]()
+-[2. application.properties preparaion]()
+-[3. Other settings]()
 
 ## 1. SQL setup
 
