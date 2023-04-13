@@ -28,7 +28,7 @@ public class UserDaoImpl implements UserDao {
             // Проверяем, есть ли подобный пользователь в БД. Если нет, добавляем:
             if (findByName(name) == 0) {
                 // Готовим запрос:
-                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO schema_online_course.chat_users (login, password) values (?,?);");
+                PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO schema_server.chat_users (login, password) values (?,?);");
                 // Проставляем параметры вместо ?:
                 preparedStatement.setString(1, name);
                 preparedStatement.setString(2, password);
@@ -55,7 +55,7 @@ public class UserDaoImpl implements UserDao {
             // Проверяем, есть ли подобный пользователь в БД. Если есть, удаляем:
             if (findByName(name) == 1) {
                 // Готовим запрос:
-                PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM schema_online_course.chat_users WHERE login=? and password = ?;");
+                PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM schema_server.chat_users WHERE login=? and password = ?;");
                 // Проставляем параметры вместо ?:
                 preparedStatement.setString(1, name);
                 preparedStatement.setString(2, password);
@@ -81,7 +81,7 @@ public class UserDaoImpl implements UserDao {
                 props.getValue("db.password"));
         ) {
             // Готовим запрос:
-            PreparedStatement preparedStatement = connection.prepareStatement("select count(*) cnt from schema_online_course.chat_users where login=?;");
+            PreparedStatement preparedStatement = connection.prepareStatement("select count(*) cnt from schema_server.chat_users where login=?;");
             // Проставляем параметры вместо ?:
             preparedStatement.setString(1, name);
             // Выполняем запрос:
@@ -110,7 +110,7 @@ public class UserDaoImpl implements UserDao {
                 props.getValue("db.password"));
         ) {
             // Готовим запрос:
-            PreparedStatement preparedStatement = connection.prepareStatement("select count(*) cnt from schema_online_course.chat_users where login=? and password = ?;");
+            PreparedStatement preparedStatement = connection.prepareStatement("select count(*) cnt from schema_server.chat_users where login=? and password = ?;");
             // Проставляем параметры вместо ?:
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, password);
