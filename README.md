@@ -1,6 +1,9 @@
 # server-chat application
 
 ## contents
+[1. SQL setup]()
+[2. application.properties preparaion]()
+[3. Other settings]()
 
 ## 1. SQL setup
 
@@ -52,4 +55,11 @@ db.url=jdbc:MySql://localhost:3306/schema_online_course?serverTimezone=UTC
 db.login=yourLoginHere
 db.password=yourPasswordHere
 ```
+
+## 3. Other settings
+
+3.1. For application to run properly, you must open default port `3306` in your firewall. At the first start of application Windows will ask whether or not permit the access for application to port `3306`
+
+3.2. `server-chat application` has different layers of loggin, which you can change in [log4j.properties](https://github.com/PavelSav1n/server-chat/blob/master/src/main/resources/log4j.properties). Some basic information about how to setup Log4j is present in it via comments.
+
 
