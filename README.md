@@ -44,8 +44,8 @@ CREATE TABLE `chat_users` (
 
 Once you've finished SQL setup, it's time to set up [application.properties](https://github.com/PavelSav1n/server-chat/blob/master/src/main/resources/application.properties)
 
-`db.url` -- is for MySQL server address
-`db.login`-- is for SQL database login 
+`db.url` -- is for MySQL server address \n
+`db.login`-- is for SQL database login \n
 `db.password` -- is for SQL database password
 ```CSS
 db.url=jdbc:MySql://localhost:3306/schema_online_course?serverTimezone=UTC
