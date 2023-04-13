@@ -47,7 +47,7 @@ Once you've finished SQL setup, it's time to set up [application.properties](htt
 `db.url` -- is for MySQL server address. If localhost, then keep default settings.
 `db.login` and `db.password` -- is for SQL database login & password respectively.
 
-```Java
+```SQL
 db.url=jdbc:MySql://localhost:3306/schema_online_course?serverTimezone=UTC
 db.login=yourLoginHere
 db.password=yourPasswordHere
