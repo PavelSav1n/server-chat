@@ -1,9 +1,9 @@
 # server-chat application
 
 ## contents
-- [1. SQL setup](https://github.com/PavelSav1n/server-chat/edit/master/README.md#1. SQL setup)
-- [2. application.properties preparaion](https://github.com/PavelSav1n/server-chat/edit/master/README.md#2. application.properties preparaion)
-- [3. Other settings](https://github.com/PavelSav1n/server-chat/edit/master/README.md#3. Other settings)
+- [1. SQL setup](https://github.com/PavelSav1n/server-chat/blob/master/README.md#1-sql-setup)
+- [2. application.properties preparaion](https://github.com/PavelSav1n/server-chat/blob/master/README.md#2-applicationproperties-preparaion)
+- [3. Other settings](https://github.com/PavelSav1n/server-chat/blob/master/README.md#3-other-settings)
 
 ## 1. SQL setup
 
