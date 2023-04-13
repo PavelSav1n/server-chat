@@ -1,9 +1,9 @@
 # server-chat application
 
 ## contents
-- [1. SQL setup](https://github.com/PavelSav1n/server-chat/blob/master/README.md#1-sql-setup)
-- [2. application.properties preparaion](https://github.com/PavelSav1n/server-chat/blob/master/README.md#2-applicationproperties-preparaion)
-- [3. Other settings](https://github.com/PavelSav1n/server-chat/blob/master/README.md#3-other-settings)
+1.[SQL setup](https://github.com/PavelSav1n/server-chat/blob/master/README.md#1-sql-setup)
+2.[application.properties preparaion](https://github.com/PavelSav1n/server-chat/blob/master/README.md#2-applicationproperties-preparaion)
+3.[Other settings](https://github.com/PavelSav1n/server-chat/blob/master/README.md#3-other-settings)
 
 ## 1. SQL setup
 
@@ -48,6 +48,7 @@ CREATE TABLE `chat_users` (
 Once you've finished SQL setup, it's time to set up [application.properties](https://github.com/PavelSav1n/server-chat/blob/master/src/main/resources/application.properties)
 
 `db.url` -- is for MySQL server address. If localhost, then keep default settings.
+
 `db.login` and `db.password` -- is for SQL database login & password respectively.
 
 ```C#
