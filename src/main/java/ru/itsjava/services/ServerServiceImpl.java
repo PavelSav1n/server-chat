@@ -11,6 +11,7 @@ import ru.itsjava.dao.UserDaoImpl;
 import ru.itsjava.domain.User;
 import ru.itsjava.exceptions.RecipientNotFoundException;
 import ru.itsjava.utils.Props;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
@@ -123,8 +124,14 @@ public class ServerServiceImpl implements ServerService {
         for (Observer elemObs : observers) {
             System.out.println(elemObs);
         }
-
     }
+
+    @Override
+    public ArrayList<Observer> getAllObservers() {
+        // капец я тут сократил конечно, не нужен ни foreach ни ArrayList.addAll, вообще дичь
+        return new ArrayList<>(observers);
+    }
+
 
     // Выводим список всех наблюдателей в observersTemp
     @Override
@@ -133,7 +140,6 @@ public class ServerServiceImpl implements ServerService {
         for (Observer elemObs : observersTemp) {
             System.out.println(++count + ": " + elemObs.toString().substring(elemObs.toString().length() - 9)); // для удобства восприятия оставил только hash
         }
-
     }
 
     // Получаем наблюдателя по имени
@@ -146,5 +152,4 @@ public class ServerServiceImpl implements ServerService {
         }
         throw new RecipientNotFoundException();
     }
-
 }

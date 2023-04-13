@@ -66,7 +66,6 @@ public class MessageDaoImpl implements MessageDao {
                 props.getValue("db.login"),
                 props.getValue("db.password"))
         ) {
-
             // Извлекаем из таблицы id отправителя:
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT id FROM schema_online_course.chat_users WHERE login = ?;");
             preparedStatement.setString(1, message.getFrom().toString());
@@ -92,6 +91,7 @@ public class MessageDaoImpl implements MessageDao {
     }
 
 
+    // получить amount сообщений из БД, за исключением приватных другим пользователям
     @Override
     public ArrayList<String> getLastMessages(User user, int amount) {
 
@@ -113,6 +113,43 @@ public class MessageDaoImpl implements MessageDao {
 
             preparedStatement.setString(1, user.getName());
             preparedStatement.setInt(2, amount);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            ArrayList<String> messageArray = new ArrayList<>();
+
+            while(resultSet.next()) {
+                if (resultSet.getString("receiverName") == null) {
+                    messageArray.add(resultSet.getString("senderName") + ":  " + resultSet.getString("text"));
+                } else {
+                    messageArray.add(resultSet.getString("senderName") + " to " + resultSet.getString("receiverName") + ": " + resultSet.getString("text"));
+                }
+            }
+            return messageArray;
+
+        } catch (SQLException e) {
+            log.error(e);
+            e.printStackTrace();
+        }
+        throw new MessagesNotFoundException();
+    }
+
+    // получить все сообщения из БД, за исключением приватных другим пользователям
+    @Override
+    public ArrayList<String> getAllMessages(User user) {
+
+        try (Connection connection = DriverManager.getConnection(
+                props.getValue("db.url"),
+                props.getValue("db.login"),
+                props.getValue("db.password"))
+        ) {
+            PreparedStatement preparedStatement = connection.prepareStatement("" +
+                    "SELECT sender.login as senderName, receiver.login as receiverName, msg.text\n" +
+                    "FROM schema_online_course.chat_messages AS msg\n" +
+                    "INNER JOIN schema_online_course.chat_users AS sender ON msg.sender = sender.id\n" +
+                    "LEFT JOIN schema_online_course.chat_users AS receiver ON msg.recipient = receiver.id\n" +
+                    "WHERE (recipient IS NULL OR receiver.login=?);");
+
+            preparedStatement.setString(1, user.getName());
             ResultSet resultSet = preparedStatement.executeQuery();
 
             ArrayList<String> messageArray = new ArrayList<>();

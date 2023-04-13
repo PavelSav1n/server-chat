@@ -2,6 +2,8 @@ package ru.itsjava.services;
 
 import ru.itsjava.domain.User;
 
+import java.util.ArrayList;
+
 public interface Observable {
 
     void addObserver(Observer observer); // добавить пользователя
@@ -21,6 +23,8 @@ public interface Observable {
     void notifyObserver(Observer observer, String message); // отправить уведомление указанному наблюдателю
 
     void printAllObservers();
+
+    ArrayList<Observer> getAllObservers();
 
     void printAllObserversTemp();
 

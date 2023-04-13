@@ -11,6 +11,10 @@ public interface MessageDao {
 
     Message WritePublicMessageToDatabase(Message message);
 
-    ArrayList<String> getLastMessages(User user, int amount);
+    ArrayList<String> getLastMessages(User user, int amount); // получить amount сообщений из БД, за исключением приватных другим пользователям
+
+    ArrayList<String> getAllMessages(User user); // получить все сообщения из БД, за исключением приватных другим пользователям
+
+
 
 }
