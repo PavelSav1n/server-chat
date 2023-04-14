@@ -3,7 +3,7 @@
 ## contents
 0. [About](https://github.com/PavelSav1n/server-chat#0-about)
 1. [SQL setup](https://github.com/PavelSav1n/server-chat#1-sql-setup)
-2. [application.properties preparation](https://github.com/PavelSav1n/server-chat#2-applicationproperties-preparaion)
+2. [application.properties preparation](https://github.com/PavelSav1n/server-chat#2-applicationproperties-preparation)
 3. [Other settings](https://github.com/PavelSav1n/server-chat#3-other-settings)
 
 
