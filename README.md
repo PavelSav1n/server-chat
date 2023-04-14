@@ -1,10 +1,10 @@
 # server-chat application
 
 ## contents
-0. [About](https://github.com/PavelSav1n/server-chat/blob/master/README.md#0-about)
-1. [SQL setup](https://github.com/PavelSav1n/server-chat/blob/master/README.md#1-sql-setup)
-2. [application.properties preparaion](https://github.com/PavelSav1n/server-chat/blob/master/README.md#2-applicationproperties-preparaion)
-3. [Other settings](https://github.com/PavelSav1n/server-chat/blob/master/README.md#3-other-settings)
+0. [About](https://github.com/PavelSav1n/server-chat#0-about)
+1. [SQL setup](https://github.com/PavelSav1n/server-chat#1-sql-setup)
+2. [application.properties preparaion](https://github.com/PavelSav1n/server-chat#2-applicationproperties-preparaion)
+3. [Other settings](https://github.com/PavelSav1n/server-chat#3-other-settings)
 
 
 ## 0. About
@@ -84,4 +84,4 @@ db.password=yourPasswordHere
 
 3.2. `server-chat application` has different layers of logging, which you can change in [log4j.properties](https://github.com/PavelSav1n/server-chat/blob/master/src/main/resources/log4j.properties). Some basic information about how to setup Log4j is present in those properties via comments.
 
-:arrow_up_small:[Back to contents](https://github.com/PavelSav1n/server-chat/blob/master/README.md#contents)
+:arrow_up_small:[Back to contents](https://github.com/PavelSav1n/server-chat#contents)
