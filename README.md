@@ -82,6 +82,6 @@ db.password=yourPasswordHere
 
 3.1. For application to run properly, you must open default port `3306` in your firewall. At the first start of application Windows will ask whether or not permit the access for application to port `3306`
 
-3.2. `server-chat application` has different layers of logging, which you can change in [log4j.properties](https://github.com/PavelSav1n/server-chat/blob/master/src/main/resources/log4j.properties). Some basic information about how to setup Log4j is present in it via comments.
+3.2. `server-chat application` has different layers of logging, which you can change in [log4j.properties](https://github.com/PavelSav1n/server-chat/blob/master/src/main/resources/log4j.properties). Some basic information about how to setup Log4j is present in those properties via comments.
 
 :arrow_up_small:[Back to contents](https://github.com/PavelSav1n/server-chat/blob/master/README.md#contents)
