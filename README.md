@@ -3,7 +3,7 @@
 ## contents
 0. [About](https://github.com/PavelSav1n/server-chat#0-about)
 1. [SQL setup](https://github.com/PavelSav1n/server-chat#1-sql-setup)
-2. [application.properties preparaion](https://github.com/PavelSav1n/server-chat#2-applicationproperties-preparaion)
+2. [application.properties preparation](https://github.com/PavelSav1n/server-chat#2-applicationproperties-preparaion)
 3. [Other settings](https://github.com/PavelSav1n/server-chat#3-other-settings)
 
 
@@ -20,9 +20,9 @@
 - Saving data to file
 - Implementation of some commands, like private messaging & message history
  
- Time elapsed: approximatly 2 weeks.
+ Time elapsed: approximately 2 weeks.
  
- Full project `Client-server chat application` concists of two parts:
+ Full project `Client-server chat application` consists of two parts:
 - [server-chat application](https://github.com/PavelSav1n/server-chat)
 - [client-chat](https://github.com/PavelSav1n/client-chat)
 
@@ -30,7 +30,7 @@
 
 1.1. This application requires MySQL server, or any other [RDBMS](https://en.wikipedia.org/wiki/Relational_database#RDBMS). How to install and setup MySQL server on Windows you can see [this](https://youtu.be/u96rVINbAUI) video. Here you can download [MySQL Installer 8.0.32](https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-community-8.0.32.0.msi)
 
-1.2. After you've finished with MySQL server setup, first of all you will need to create a `schema` for tables where we will be storing all data about users & messages. If you want to use `schema` of your own, you will have to change prepaired query code in `MessageDaoImpl.java` & `UserDaoImpl.java` 
+1.2. After you've finished with MySQL server setup, you will need to create a `schema` for tables where we will be storing all data about users & messages. If you want to use `schema` of your own, you will have to change prepared query code in `MessageDaoImpl.java` & `UserDaoImpl.java` 
 ```SQL
 CREATE SCHEMA schema_server ;
 ```
@@ -64,7 +64,7 @@ CREATE TABLE `chat_users` (
 ) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 ```
 
-## 2. application.properties preparaion
+## 2. application.properties preparation
 
 Once you've finished SQL setup, it's time to set up [application.properties](https://github.com/PavelSav1n/server-chat/blob/master/src/main/resources/application.properties)
 
@@ -80,8 +80,8 @@ db.password=yourPasswordHere
 
 ## 3. Other settings
 
-3.1. For application to run properly, you must open default port `3306` in your firewall. At the first start of application Windows will ask whether or not permit the access for application to port `3306`
+3.1. For application to run properly, you must open default port `3306` in your firewall. At the first start of application Windows will ask whether permit the access for application to port `3306`
 
-3.2. `server-chat application` has different layers of logging, which you can change in [log4j.properties](https://github.com/PavelSav1n/server-chat/blob/master/src/main/resources/log4j.properties). Some basic information about how to setup Log4j is present in those properties via comments.
+3.2. `server-chat application` has different layers of logging, which you can change in [log4j.properties](https://github.com/PavelSav1n/server-chat/blob/master/src/main/resources/log4j.properties). Some basic information about how to set up Log4j is present in those properties via comments.
 
 :arrow_up_small:[Back to contents](https://github.com/PavelSav1n/server-chat#contents)
