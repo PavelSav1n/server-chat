@@ -5,6 +5,26 @@
 2. [application.properties preparaion](https://github.com/PavelSav1n/server-chat/blob/master/README.md#2-applicationproperties-preparaion)
 3. [Other settings](https://github.com/PavelSav1n/server-chat/blob/master/README.md#3-other-settings)
 
+
+## 0. About
+
+`Client-server chat application` project was developed as a final task of ITsJAVA Java Developer course. The aim was to develop a client-server chat application with following features:
+- Client-server architecture
+- Observer pattern implementation
+- SQL database integration
+- Multiple users
+- Authorisation/registration process
+- Password encryption
+- Logging
+- Saving data to file
+- Implementation of some commands, like private messaging & message history
+ 
+ Time elapsed: approximatly 2 weeks.
+ 
+ Full project `Client-server chat application` concists of two parts:
+- [server-chat application](https://github.com/PavelSav1n/server-chat)
+- [client-chat](https://github.com/PavelSav1n/client-chat)
+
 ## 1. SQL setup
 
 1.1. This application requires MySQL server, or any other [RDBMS](https://en.wikipedia.org/wiki/Relational_database#RDBMS). How to install and setup MySQL server on Windows you can see [this](https://youtu.be/u96rVINbAUI) video. Here you can download [MySQL Installer 8.0.32](https://dev.mysql.com/get/Downloads/MySQLInstaller/mysql-installer-community-8.0.32.0.msi)
@@ -61,6 +81,6 @@ db.password=yourPasswordHere
 
 3.1. For application to run properly, you must open default port `3306` in your firewall. At the first start of application Windows will ask whether or not permit the access for application to port `3306`
 
-3.2. `server-chat application` has different layers of loggin, which you can change in [log4j.properties](https://github.com/PavelSav1n/server-chat/blob/master/src/main/resources/log4j.properties). Some basic information about how to setup Log4j is present in it via comments.
+3.2. `server-chat application` has different layers of logging, which you can change in [log4j.properties](https://github.com/PavelSav1n/server-chat/blob/master/src/main/resources/log4j.properties). Some basic information about how to setup Log4j is present in it via comments.
 
 :arrow_up_small:[Back to contents](https://github.com/PavelSav1n/server-chat/blob/master/README.md#contents)
